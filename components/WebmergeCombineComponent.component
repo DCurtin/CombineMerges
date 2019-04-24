@@ -1,0 +1,20 @@
+<apex:component controller="WebmergeCombineController" allowDML="true">
+	<apex:attribute name="parentRecordsList" assignTo="{!recordsList}"  description="The record to use."  type="SObject[]"/>
+    <apex:attribute name="parentSObjectType" assignTo="{!sobjectTypeName}"  description="The record to use."  type="String"/>
+    <apex:form >
+        <apex:pageblock rendered="{!showMappings}">
+            <apex:pageBlockTable value="{!mappings}" var="maps">
+                <apex:column headerValue="Name">
+                    <apex:commandLink action="{!generateWebmerges}" value="{!maps.Name}">
+                        <apex:param name="mergeId" value="{!maps.Id}"/>
+                    </apex:commandLink>
+                </apex:column>
+                <apex:column value="{!maps.webm__Description__c}"/>
+            </apex:pageBlockTable>
+        </apex:pageblock>
+        <apex:pageBlock rendered="{!!showMappings}"> <!--Bang! Bang!-->
+            <body>{!errorMessage}</body>
+            <apex:commandButton value="Go Back" action="{!goBack}"/>
+        </apex:pageBlock>
+    </apex:form>
+</apex:component>
