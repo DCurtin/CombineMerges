@@ -6,15 +6,10 @@ public with sharing class WebmergeCombineController{
     public string           errorMessage      {set;get;}
 
     public list<webm__Webmerge_Mapping__c> mappings {set; 
-        get{if(mappings == null)
+        get{
+            if(mappings == null)
             {
-                mappings = [SELECT Id, Name, webm__Description__c, webm__Salesforce_Object_Name__c  FROM webm__Webmerge_Mapping__c WHERE webm__Salesforce_Object_Name__c=:sobjectTypeName ];
-                if(mappings.size() == 0)
-                {
-                    showMappings = false;
-                    errorMessage = 'No mappings available for this object.';
-                    return null;
-                }
+                mappings = [SELECT Id, Name, webm__Description__c, webm__Salesforce_Object_Name__c  FROM webm__Webmerge_Mapping__c WHERE webm__Salesforce_Object_Name__c=:sobjectTypeName];
             }
             return mappings;}
     }
@@ -31,10 +26,18 @@ public with sharing class WebmergeCombineController{
 
     public Boolean showMappings {set;
         get{
-            if(recordsList == null || mappings == null)
+            
+            if(recordsList == null)
             {
+                showMappings = false;
                 errorMessage = 'No records selected.';
                 return false;
+            }
+            if(mappings == null || mappings.size() == 0)
+            {
+                showMappings = false;
+                errorMessage = 'No mappings available for this object.';
+                return null;
             }
             return true;
         }
