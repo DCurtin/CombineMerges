@@ -45,7 +45,7 @@ public with sharing class WebmergeCombineController{
         {
             recordIds.add(record.id);
         }
-        //System.debug('Button ACCOUNTS ' + accountIds);
+
         combineWebmerges(mappingId, recordIds, sobjectTypeName);
 
         return returnAddress(returnPage);
