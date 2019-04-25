@@ -16,11 +16,15 @@ public with sharing class WebmergeCombineController{
     
     private final PageReference returnPage {set; 
         get{
-            if(sobjectTypeName != null)
+            if(sobjectTypeName != null && returnPage == null)
             {
-                return new PageReference('/lightning/o/'+sobjectTypeName+'/list?filterName=Recent');
+                 returnPage = new PageReference('/lightning/o/'+sobjectTypeName+'/list?filterName=Recent');
             }
-            return new PageReference('/lightning');
+            if(returnPage == null)
+            {
+                returnPage = new PageReference('/lightning');
+            }
+            return returnPage;
         }
     }
 
