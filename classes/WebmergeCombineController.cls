@@ -29,15 +29,14 @@ public with sharing class WebmergeCombineController{
             
             if(recordsList == null)
             {
-                showMappings = false;
                 errorMessage = 'No records selected.';
                 return false;
             }
+
             if(mappings == null || mappings.size() == 0)
             {
-                showMappings = false;
                 errorMessage = 'No mappings available for this object.';
-                return null;
+                return false;
             }
             return true;
         }
