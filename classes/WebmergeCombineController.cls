@@ -7,7 +7,7 @@ public with sharing class WebmergeCombineController{
 
     public list<webm__Webmerge_Mapping__c> mappings {set; 
         get{
-            if(mappings == null)
+            if(mappings == null && sobjectTypeName != null)
             {
                 mappings = [SELECT Id, Name, webm__Description__c, webm__Salesforce_Object_Name__c  FROM webm__Webmerge_Mapping__c WHERE webm__Salesforce_Object_Name__c=:sobjectTypeName];
             }
@@ -42,43 +42,41 @@ public with sharing class WebmergeCombineController{
                 errorMessage = 'No mappings available for this object.';
                 return false;
             }
+
+            errorMessage= '';
             return true;
         }
     }
 
     public PageReference generateWebmerges()
     {
-        id mappingId = (id) ApexPages.currentPage().getParameters().get('mergeId');   
-        List<Id> recordIds = new List<Id>();
-        System.debug('recordsList: ' + recordsList);
-        for(SObject record : recordsList)
-        {
-            recordIds.add(record.id);
-        }
-
-        combineWebmerges(mappingId, recordIds, sobjectTypeName);
-
-        return returnAddress(returnPage);
+        id mappingId = (id) ApexPages.currentPage().getParameters().get('mergeId');
+        List<Id> recordIds = getIdsFromRecords(recordsList);
+        boolean success = combineWebmerges(mappingId, recordIds, sobjectTypeName);
+        return returnPage;
     }
 
     public PageReference goBack()
     {
-        return returnAddress(returnPage);
+        return returnPage;
     }
 
-    private void combineWebmerges(id mappingId,List<Id> recordIds, string objectType)
+    public List<Id> getIdsFromRecords (List<SObject> recordList)
     {
-        webm.WebmergeGenerator.generateDocumentBatchCombined(
+        List<Id> recordIds = new List<Id>();
+        for(SObject record : recordList)
+        {
+            recordIds.add(record.id);
+        }
+        return recordIds;
+    }
+
+    private Boolean combineWebmerges(id mappingId,List<Id> recordIds, string objectType)
+    {
+        return webm.WebmergeGenerator.generateDocumentBatchCombined(
             mappingId, 
             recordIds, 
             objectType
             );
     }
-
-    private PageReference returnAddress(PageReference returnPage)
-    {
-        return returnPage;
-    }
-
-
 }
