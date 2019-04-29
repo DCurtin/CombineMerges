@@ -9,14 +9,12 @@ private class WebmergeCombineControllerTest {
 
     @testSetup 
     static void setup() {
-        List<Account> testAccounts = TestUtils.CreateAccounts(MAXACCOUNTS);
-        insert testAccounts;
+        TestUtils.insertAccounts(MAXACCOUNTS);
 
         generateAndInsertMappings(MAPPINGCOUNT, SOBJECTTYPENAME);
     }
 
-    @IsTest
-    private static void generateWebmerges()
+    static testmethod void generateWebmerges_generalTestWithCorrectInput_returnsPageReferenceWithSObjectRecentRecordsURL()
     {
         WebmergeCombineController WMCC = testSetup(1);
 
@@ -32,8 +30,8 @@ private class WebmergeCombineControllerTest {
         System.assertEquals(returnUrlWithType, returnPage.getUrl());
     }
 
-    @IsTest
-    private static void getMappingsTest() {
+    static testmethod void getMappings_testMappingQueryForNumberOfAvailableMappings_numberOfMappingsEquallsMAPPINGCOUNTConstant() 
+    {
         WebmergeCombineController WMCC = testSetup();
 
         System.assertNotEquals(WMCC.mappings, null);
@@ -43,26 +41,34 @@ private class WebmergeCombineControllerTest {
         System.assertEquals(3,mappingCount);
 	}
 
-    @IsTest
-    private static void goBackTest() {
+    static testmethod void goBack_setControllerWithRecordTypeString_returnsPageReferenceWithURLForRecentRecords() 
+    {
         string recordTypeStr = 'Account';
         List<Account> testAccounts = [SELECT id FROM Account LIMIT :MAXACCOUNTS];
 
         string returnUrlWithType = '/lightning/o/'+recordTypeStr+'/list?filterName=Recent';
+     
+        WebmergeCombineController wMCCWithTypeSet = testSetup(testAccounts, recordTypeStr);
+        
+        PageReference returnPageWithType    = wMCCWithTypeSet.goBack();
+        
+        System.assertEquals(returnPageWithType.getUrl(), returnUrlWithType);
+    }
+
+    static testmethod void goBack_setControllerWithNoRecordTypeString_returnsPageReferenceWithURLForLightningHomePage() 
+    {
+        List<Account> testAccounts = [SELECT id FROM Account LIMIT :MAXACCOUNTS];
+
         string returnUrlWithOutType = '/lightning';
 
-        WebmergeCombineController wMCCWithTypeSet = testSetup(testAccounts, recordTypeStr);
         WebmergeCombineController wMCCWithOutTypeSet = testSetup(testAccounts, null);
 
-        PageReference returnPageWithType    = wMCCWithTypeSet.goBack();
         PageReference returnPageWithoutType = wMCCWithOutTypeSet.goBack();
 
-        System.assertEquals(returnPageWithType.getUrl(), returnUrlWithType);
         System.assertEquals(returnPageWithoutType.getUrl(), returnUrlWithOutType);
     }
 
-    @IsTest
-    private static void getIdsFromRecordsTest ()
+    static testmethod void getIdsFromRecords_givenListofRecords_returnsEquallSizedListOfRecordIDs()
     {
         WebmergeCombineController testController = new WebmergeCombineController();
         List<Account> testAccounts = [SELECT id FROM Account LIMIT :MAXACCOUNTS];
@@ -76,12 +82,9 @@ private class WebmergeCombineControllerTest {
         }
     }
 
-    @IsTest
-    private static void getShowMappingsTest()
+    static testmethod void getShowMappings_setControllerWithoutRecordsOrRecordType_returnsFalseAndNoRecordsErrorMessage()
     {
         String recordsNotSet = 'No records selected.';
-        String noMappingsAvailable = 'No mappings available for this object.';
-        string noError = '';
 
         string recordTypeStr = 'Account';
 
@@ -89,25 +92,43 @@ private class WebmergeCombineControllerTest {
 
         WebmergeCombineController WMCCTestNullVars = testSetup(null, null);
 
-        WebmergeCombineController WMCCTestNullSobjectTypeName = testSetup(testAccounts,null);
-
-        WebmergeCombineController WMCCTestGeneralCase = testSetup(testAccounts, recordTypeStr);
-
         //Test recordList andsobjectTypeName null
         Boolean areMappingsShown = WMCCTestNullVars.showMappings;
         String errorMessage = WMCCTestNullVars.errorMessage;
         System.assertEquals(FALSE, areMappingsShown);
         System.assertEquals(recordsNotSet, errorMessage);
+    }
+
+    static testmethod void getShowMappings_setControllerWithRecordsWithoutRecordType_returnsFalseAndNoMappingsErrorMessage()
+    {
+        String noMappingsAvailable = 'No mappings available for this object.';
+
+        string recordTypeStr = 'Account';
+
+        List<Account> testAccounts = [SELECT id FROM Account LIMIT :MAXACCOUNTS];
+
+        WebmergeCombineController WMCCTestNullSobjectTypeName = testSetup(testAccounts,null);
 
         //Test only sobjectTypeName null
-        areMappingsShown = WMCCTestNullSobjectTypeName.showMappings;
-        errorMessage = WMCCTestNullSobjectTypeName.errorMessage;
+        Boolean areMappingsShown = WMCCTestNullSobjectTypeName.showMappings;
+        String errorMessage = WMCCTestNullSobjectTypeName.errorMessage;
         System.assertEquals(FALSE, areMappingsShown);
         System.assertEquals(noMappingsAvailable, errorMessage);
+    }
+
+    static testmethod void getShowMappings_setControllerWithRecordsAndRecordType_returnsTrue()
+    {
+        string noError = '';
+
+        string recordTypeStr = 'Account';
+
+        List<Account> testAccounts = [SELECT id FROM Account LIMIT :MAXACCOUNTS];
+
+        WebmergeCombineController WMCCTestGeneralCase = testSetup(testAccounts, recordTypeStr);
 
         //Test general case, should be no error and show mappings
-        areMappingsShown = WMCCTestGeneralCase.showMappings;
-        errorMessage = WMCCTestGeneralCase.errorMessage;
+        Boolean areMappingsShown = WMCCTestGeneralCase.showMappings;
+        String errorMessage = WMCCTestGeneralCase.errorMessage;
         System.assertEquals(TRUE, areMappingsShown);
         System.assertEquals(noError, errorMessage);
     }
